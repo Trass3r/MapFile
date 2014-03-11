@@ -54,7 +54,7 @@ struct Summary
 		mPGSecondaryCount = 0;
 	}
 
-	void addToTable(NVSHARE::HtmlTable* table)
+	void addToTable(NVSHARE::HtmlTable* table) const
 	{
 		table->addColumn("[1] Primary Only");
 		table->addColumn(mPrimarySize);
@@ -143,7 +143,7 @@ struct SubSectionData
 	unsigned int mAddressCount;
 	unsigned int mAddressSize;
 
-	void addToTable(NVSHARE::HtmlTable* table)
+	void addToTable(NVSHARE::HtmlTable* table) const
 	{
 		table->addColumn(mSection);
 		table->addColumn(mSectionSize);
@@ -175,7 +175,7 @@ struct ObjectData
 	std::string mObjectName;
 	unsigned int mObjectFunctionCount;
 
-	void addToTable(NVSHARE::HtmlTable* table)
+	void addToTable(NVSHARE::HtmlTable* table) const
 	{
 		if (mObjectSize > 0)
 		{
@@ -199,7 +199,7 @@ struct FunctionData
 	std::string mFunctionName;
 	std::string mObjectName;
 
-	void addToTable(NVSHARE::HtmlTable* table)
+	void addToTable(NVSHARE::HtmlTable* table) const
 	{
 		if (mFunctionSize > 0)
 		{
@@ -286,7 +286,7 @@ struct SectionData
 	unsigned int mTotal;
 	bool mSecondMap;
 
-	void addToDualTable(NVSHARE::HtmlTable* table)
+	void addToDualTable(NVSHARE::HtmlTable* table) const
 	{
 		table->addColumn(mSection);
 
@@ -340,7 +340,7 @@ struct SectionData
 		table->nextRow();
 	}
 
-	void addToTable(NVSHARE::HtmlTable* table)
+	void addToTable(NVSHARE::HtmlTable* table) const
 	{
 		table->addColumn(mSection);
 		table->addColumn(mTotalLength);
@@ -387,9 +387,9 @@ struct ByType
 		}
 	}
 
-	void getFunctionNames(std::string& names, unsigned int maxLen)
+	void getFunctionNames(std::string& names, unsigned int maxLen) const
 	{
-		for (StringVector::iterator i = mFunctions.begin(); i != mFunctions.end(); ++i)
+		for (StringVector::const_iterator i = mFunctions.cbegin(); i != mFunctions.cend(); ++i)
 		{
 			names += (*i);
 			if ((i + 1) != mFunctions.end())
@@ -442,10 +442,10 @@ struct Section
 		return ret;
 	}
 
-	void report(SubSectionDataVector& slist)
+	void report(SubSectionDataVector& slist) const
 	{
 		unsigned int total = 0;
-		for (BasicAddressVector::iterator i = mAddresses.begin(); i != mAddresses.end(); i++)
+		for (auto i = mAddresses.cbegin(); i != mAddresses.cend(); i++)
 		{
 			total += (*i).mLength;
 		}
@@ -460,12 +460,12 @@ struct Section
 		slist.push_back(sd);
 	}
 
-	void reportDetails(unsigned int section, FunctionDataVector& flist, ObjectDataVector& olist)
+	void reportDetails(unsigned int section, FunctionDataVector& flist, ObjectDataVector& olist) const
 	{
 		{
 			ByTypeMap byFunction;
 
-			for (BasicAddressVector::iterator i = mAddresses.begin(); i != mAddresses.end(); i++)
+			for (auto i = mAddresses.cbegin(); i != mAddresses.cend(); i++)
 			{
 				ByTypeMap::iterator found = byFunction.find((*i).mFunctionName);
 				if (found == byFunction.end())
@@ -501,7 +501,7 @@ struct Section
 		{
 			ByTypeMap byObject;
 
-			for (BasicAddressVector::iterator i = mAddresses.begin(); i != mAddresses.end(); i++)
+			for (BasicAddressVector::const_iterator i = mAddresses.cbegin(); i != mAddresses.cend(); i++)
 			{
 				ByTypeMap::iterator found = byObject.find((*i).mObjectName);
 				if (found == byObject.end())
@@ -539,21 +539,19 @@ struct Section
 		}
 	}
 
-	void getTotals(unsigned int& total, unsigned int& total_count)
+	void getTotals(unsigned int& total, unsigned int& total_count) const
 	{
 		total_count += mAddresses.size();
-		for (BasicAddressVector::iterator i = mAddresses.begin(); i != mAddresses.end(); i++)
-		{
+		for (auto i = mAddresses.cbegin(); i != mAddresses.cend(); i++)
 			total += (*i).mLength;
-		}
 	}
 
-	BasicAddress* findBasicAddress(const BasicAddress& ba)
+	const BasicAddress* findBasicAddress(const BasicAddress& ba) const
 	{
-		BasicAddress* ret = 0;
-		for (BasicAddressVector::iterator i = mAddresses.begin(); i != mAddresses.end(); ++i)
+		const BasicAddress* ret = 0;
+		for (auto i = mAddresses.cbegin(); i != mAddresses.cend(); ++i)
 		{
-			BasicAddress* b = &(*i);
+			const BasicAddress* b = &(*i);
 			if (strcmp(b->mFunctionName.c_str(), ba.mFunctionName.c_str()) == 0 &&
 			    strcmp(b->mObjectName.c_str(), ba.mObjectName.c_str()) == 0)
 			{
@@ -628,11 +626,11 @@ struct SectionBase
 		found = true;
 	}
 
-	void reportSections(unsigned int section, SectionData& sd)
+	void reportSections(unsigned int section, SectionData& sd) const
 	{
 		unsigned int total = 0;
 		unsigned int total_count = 0;
-		for (SectionVector::iterator i = mSections.begin(); i != mSections.end(); ++i)
+		for (auto i = mSections.cbegin(); i != mSections.cend(); ++i)
 		{
 			(*i).getTotals(total, total_count);
 		}
@@ -646,13 +644,13 @@ struct SectionBase
 		sd.mTotal = total;
 	}
 
-	void reportDetails(unsigned int section, SubSectionDataVector& slist, ObjectDataVector& olist, FunctionDataVector& flist)
+	void reportDetails(unsigned int section, SubSectionDataVector& slist, ObjectDataVector& olist, FunctionDataVector& flist) const
 	{
-		for (SectionVector::iterator i = mSections.begin(); i != mSections.end(); i++)
+		for (auto i = mSections.cbegin(); i != mSections.cend(); i++)
 		{
 			(*i).report(slist);
 		}
-		for (SectionVector::iterator i = mSections.begin(); i != mSections.end(); i++)
+		for (auto i = mSections.cbegin(); i != mSections.cend(); i++)
 		{
 			(*i).reportDetails(section, flist, olist);
 		}
@@ -715,7 +713,7 @@ struct SubSectionDifference
 		mSecondary = sd;
 	}
 
-	void addToTable(NVSHARE::HtmlTable* table)
+	void addToTable(NVSHARE::HtmlTable* table) const
 	{
 		if (mSecondary)
 		{
@@ -795,7 +793,7 @@ struct ObjectDataDifference
 		mSecondary = sd;
 	}
 
-	void addToTable(NVSHARE::HtmlTable* table)
+	void addToTable(NVSHARE::HtmlTable* table) const
 	{
 		if (mSecondary)
 		{
@@ -886,7 +884,7 @@ struct FunctionDataDifference
 	}
 
 	// accumulate totals into the summary result structure
-	void addToSummary(Summary& s)
+	void addToSummary(Summary& s) const
 	{
 		if (mSecondary)
 		{
@@ -931,7 +929,7 @@ struct FunctionDataDifference
 		}
 	}
 
-	void addToTable(NVSHARE::HtmlTable* table, FunctionReport type)
+	void addToTable(NVSHARE::HtmlTable* table, FunctionReport type) const
 	{
 
 		bool display = false;
@@ -1158,7 +1156,8 @@ public:
 			}
 			else
 			{
-				(*found).addSecondary(&sd);
+				// ok since it doesn't touch the variables used for sorting
+				const_cast<SubSectionDifference&>(*found).addSecondary(&sd);
 			}
 		}
 
@@ -1207,7 +1206,8 @@ public:
 				}
 				else
 				{
-					(*found).addSecondary(&sd);
+					// ok since it doesn't touch the variables used for sorting
+					const_cast<ObjectDataDifference&>(*found).addSecondary(&sd);
 				}
 			}
 		}
@@ -1405,7 +1405,8 @@ public:
 				}
 				else
 				{
-					(*found).addSecondary(&sd);
+					// ok since it doesn't touch the variables used for sorting
+					const_cast<FunctionDataDifference&>(*found).addSecondary(&sd);
 				}
 			}
 		}
